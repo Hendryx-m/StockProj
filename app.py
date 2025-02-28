@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import yfinance as yf
 from stock_analysis import fetch_stock_data, calculate_moving_average, calculate_rsi
+import plotly.graph_objects as go
+
 
 # Defining fetch_stock_data
 def fetch_stock_data(ticker, start_data, end_date):
@@ -15,10 +17,21 @@ def calculate_moving_average(data, window=20):
 
 # Defining calculate_rsi
 def calculate_rsi(data, window=14):
-    delta = delta['Close'].diff()
-    gain = (delta.where(delta >0, 0)).rolling(window=window).mean()
-    loss = (-delta.where(delta < 0, 0)).rolling(window=window).mean()
-    rs = gain / loss
+    # Calculate price changes
+    delta = data['Close'].diff()
+    
+    # Separate gains and losses
+    gain = delta.where(delta > 0, 0)
+    loss = -delta.where(delta < 0, 0)
+    
+    # Calculate average gains and losses
+    avg_gain = gain.rolling(window=window, min_periods=1).mean()
+    avg_loss = loss.rolling(window=window, min_periods=1).mean()
+    
+    # Calculate relative strength (RS)
+    rs = avg_gain / avg_loss
+    
+    # Calculate RSI
     data['RSI'] = 100 - (100 / (1 + rs))
     return data
 
