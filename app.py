@@ -16,8 +16,15 @@ nltk.download('vader_lexicon')
 import warnings
 warnings.filterwarnings("ignore", message=".*missing ScriptRunContext.*")
 
-import alpaca_trade_api as tradeapi
-from alpaca_trade_api.stream import Stream
+try:
+    import alpaca_trade_api as tradeapi
+    from alpaca_trade_api.stream import Stream
+    ALPACA_AVAILABLE = True
+except ImportError:
+    tradeapi = None
+    Stream = None
+    ALPACA_AVAILABLE = False
+
 import asyncio
 import threading
 import os
@@ -68,6 +75,9 @@ async def on_quote(data):
                 print("Error sending email alert:", e)
 
 async def run_stream():
+    if not ALPACA_AVAILABLE:
+        print("Alpaca not available. Streaming disabled.")
+        return
     API_KEY = os.getenv("APCA_API_KEY_ID", "PK72F14MY9AE5K6H4EJE")
     API_SECRET = os.getenv("APCA_API_SECRET_KEY", "9gwRVD6idycWU5byU8TsOgj3KXz2wvO10L6yZuYl")
     BASE_URL = "https://paper-api.alpaca.markets"

@@ -6,3 +6,5 @@ scikit-learn
 streamlit-autorefresh
 nltk
 alpaca-trade-api
+requests>=2.32.0
+urllib3>=2.2.1
